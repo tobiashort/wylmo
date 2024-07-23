@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"image/draw"
 	"io"
 	"net/http"
 	"os"
