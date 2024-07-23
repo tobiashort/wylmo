@@ -129,13 +129,16 @@ func performTest(typeOfTest string, curlCommand string) {
 		if err != nil && !os.IsExist(err) {
 			panic(err)
 		}
+		err = os.WriteFile("hard_timeout/curlCommand.txt", []byte(curlCommand), 0644)
+		assert.NoErr(err)
 		for {
 			now := time.Now()
 			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
 			cmd := exec.Command("bash", "-c", curlCommand)
 			bytesOut, _ := cmd.CombinedOutput()
 			logFile := fmt.Sprintf("hard_timeout/%v.log", now)
-			os.WriteFile(logFile, bytesOut, 0644)
+			err = os.WriteFile(logFile, bytesOut, 0644)
+			assert.NoErr(err)
 			response, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(bytesOut)), nil)
 			if err != nil || response.StatusCode > 299 || response.StatusCode < 200 {
 				fmt.Println(red(string(bytesOut)))
@@ -149,6 +152,8 @@ func performTest(typeOfTest string, curlCommand string) {
 		if err != nil && !os.IsExist(err) {
 			panic(err)
 		}
+		err = os.WriteFile("inactivity_timeout/curlCommand.txt", []byte(curlCommand), 0644)
+		assert.NoErr(err)
 		var duration time.Duration
 		for {
 			fmt.Printf("Waiting for "+blue("'%v'")+"\n", duration)
@@ -158,7 +163,8 @@ func performTest(typeOfTest string, curlCommand string) {
 			cmd := exec.Command("bash", "-c", curlCommand)
 			bytesOut, _ := cmd.CombinedOutput()
 			logFile := fmt.Sprintf("inactivity_timeout/%v.log", now)
-			os.WriteFile(logFile, bytesOut, 0644)
+			err = os.WriteFile(logFile, bytesOut, 0644)
+			assert.NoErr(err)
 			response, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(bytesOut)), nil)
 			if err != nil || response.StatusCode > 299 || response.StatusCode < 200 {
 				fmt.Println(red(string(bytesOut)))
