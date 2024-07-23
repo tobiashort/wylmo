@@ -125,7 +125,6 @@ func performTest(typeOfTest string, curlCommand string) {
 	assert.True(typeOfTest == "Hard timeout" || typeOfTest == "Inactivity timeout", "unknown type of test: "+typeOfTest)
 	fmt.Println("Performing '" + blue(typeOfTest) + "' test...")
 	start := time.Now()
-	fmt.Printf("It is now "+blue("'%v'")+"\n", start)
 	cmd := exec.Command("bash", "-c", curlCommand)
 	if typeOfTest == "Hard timeout" {
 		err := os.Mkdir("hard_timeout", 0755)
@@ -133,8 +132,10 @@ func performTest(typeOfTest string, curlCommand string) {
 			panic(err)
 		}
 		for {
+			now := time.Now()
+			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
 			bytesOut, _ := cmd.CombinedOutput()
-			logFile := fmt.Sprintf("hard_timeout/%v.log", time.Now())
+			logFile := fmt.Sprintf("hard_timeout/%v.log", now)
 			os.WriteFile(logFile, bytesOut, 0644)
 			response, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(bytesOut)), nil)
 			if err != nil || response.StatusCode > 299 || response.StatusCode < 200 {
@@ -152,8 +153,10 @@ func performTest(typeOfTest string, curlCommand string) {
 		var duration time.Duration
 		for {
 			time.Sleep(duration)
+			now := time.Now()
+			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
 			bytesOut, _ := cmd.CombinedOutput()
-			logFile := fmt.Sprintf("inactivity_timeout/%v.log", time.Now())
+			logFile := fmt.Sprintf("inactivity_timeout/%v.log", now)
 			os.WriteFile(logFile, bytesOut, 0644)
 			response, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(bytesOut)), nil)
 			if err != nil || response.StatusCode > 299 || response.StatusCode < 200 {
