@@ -102,16 +102,15 @@ func requestCurlCommand() string {
 	fmt.Print("Please hit enter to review the curl command's output before continuing")
 	readLine()
 	assert.NoErr(err)
-	cmd = exec.Command("less")
+	cmd = exec.Command("more")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	writer, err := cmd.StdinPipe()
 	assert.NoErr(err)
 	err = cmd.Start()
 	assert.NoErr(err)
-	bufWriter := bufio.NewWriter(writer)
-	bufWriter.WriteString(output)
-	bufWriter.Flush()
+	writer.Write(outBytes)
+	writer.Close()
 	err = cmd.Wait()
 	assert.NoErr(err)
 	ok := yesno("Is the curl command's output ok?")
@@ -125,7 +124,6 @@ func performTest(typeOfTest string, curlCommand string) {
 	assert.True(typeOfTest == "Hard timeout" || typeOfTest == "Inactivity timeout", "unknown type of test: "+typeOfTest)
 	fmt.Println("Performing '" + blue(typeOfTest) + "' test...")
 	start := time.Now()
-	cmd := exec.Command("bash", "-c", curlCommand)
 	if typeOfTest == "Hard timeout" {
 		err := os.Mkdir("hard_timeout", 0755)
 		if err != nil && !os.IsExist(err) {
@@ -134,6 +132,7 @@ func performTest(typeOfTest string, curlCommand string) {
 		for {
 			now := time.Now()
 			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
+			cmd := exec.Command("bash", "-c", curlCommand)
 			bytesOut, _ := cmd.CombinedOutput()
 			logFile := fmt.Sprintf("hard_timeout/%v.log", now)
 			os.WriteFile(logFile, bytesOut, 0644)
@@ -156,6 +155,7 @@ func performTest(typeOfTest string, curlCommand string) {
 			time.Sleep(duration)
 			now := time.Now()
 			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
+			cmd := exec.Command("bash", "-c", curlCommand)
 			bytesOut, _ := cmd.CombinedOutput()
 			logFile := fmt.Sprintf("inactivity_timeout/%v.log", now)
 			os.WriteFile(logFile, bytesOut, 0644)
