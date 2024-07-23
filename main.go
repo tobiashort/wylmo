@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"image/draw"
 	"io"
 	"net/http"
 	"os"
@@ -152,6 +153,7 @@ func performTest(typeOfTest string, curlCommand string) {
 		}
 		var duration time.Duration
 		for {
+			fmt.Printf("Waiting for "+blue("'%v'")+"\n", duration)
 			time.Sleep(duration)
 			now := time.Now()
 			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
