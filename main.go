@@ -182,7 +182,8 @@ func performHardTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		must(os.WriteFile(fmt.Sprintf("hard_timeout/%v.txt", now), []byte(output), 0644))
+		logFile := strings.ReplaceAll(fmt.Sprintf("hard_timeout/%v.txt", now), " ", "_")
+		must(os.WriteFile(logFile, []byte(output), 0644))
 		firstLine := must2(bufio.NewReader(strings.NewReader(output)).ReadString('\n'))
 		if err != nil {
 			printf("%v #r{%s}", now, firstLine)
@@ -208,7 +209,8 @@ func performInactivityTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		must(os.WriteFile(fmt.Sprintf("inactivity_timeout/%v.txt", now), []byte(output), 0644))
+		logFile := strings.ReplaceAll(fmt.Sprintf("inactivity_timeout/%v.txt", now), " ", "_")
+		must(os.WriteFile(logFile, []byte(output), 0644))
 		firstLine := must2(bufio.NewReader(strings.NewReader(output)).ReadString('\n'))
 		if err != nil {
 			printf("%v #r{%s}", now, firstLine)
