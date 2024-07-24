@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"os/exec"
 	"regexp"
@@ -21,6 +22,9 @@ const colorRed = "\033[38;5;198m"
 const colorReset = "\033[0;0m"
 
 var noColors bool
+
+var referenceResponse string
+var referenceResponseVec map[string]float64
 
 func must(err error) {
 	if err != nil {
@@ -152,7 +156,7 @@ func requestCurlCommand() string {
 		return requestCurlCommand()
 	}
 	println("Curl command was successful.")
-	printf("Please hit enter to review the curl command's output before continuing")
+	printf("Please hit enter to review the curl command's output before continuing.")
 	readLine()
 	cmd = exec.Command("more")
 	cmd.Stdout = os.Stdout
@@ -163,9 +167,44 @@ func requestCurlCommand() string {
 	must(writer.Close())
 	must(cmd.Wait())
 	if ok := yesno("Is the curl command's output ok?"); ok {
+		referenceResponse = string(outBytes)
+		referenceResponseVec = text2vec(referenceResponse)
 		return curlCommand
 	}
 	return requestCurlCommand()
+}
+
+func text2vec(text string) map[string]float64 {
+	vec := make(map[string]float64)
+	for _, field := range strings.Fields(text) {
+		count := vec[field]
+		count++
+		vec[field] = count
+	}
+	return vec
+}
+
+func cosineSimilarity(vec1, vec2 map[string]float64) float64 {
+	biggerVec := vec1
+	if len(vec2) > len(vec1) {
+		biggerVec = vec2
+	}
+	var divident float64
+	for key := range biggerVec {
+		divident += vec1[key] * vec2[key]
+	}
+	var divisorPart1 float64
+	for _, value := range vec1 {
+		divisorPart1 += value * value
+	}
+	divisorPart1 = math.Sqrt(divisorPart1)
+	var divisorPart2 float64
+	for _, value := range vec2 {
+		divisorPart2 += value * value
+	}
+	divisorPart2 = math.Sqrt(divisorPart2)
+	divisor := divisorPart1 * divisorPart2
+	return divident / divisor
 }
 
 func performHardTimeoutTest(curlCommand string) {
@@ -184,11 +223,11 @@ func performHardTimeoutTest(curlCommand string) {
 		now := time.Now()
 		logFile := strings.ReplaceAll(fmt.Sprintf("hard_timeout/%v.txt", now), " ", "_")
 		must(os.WriteFile(logFile, []byte(output), 0644))
-		firstLine := must2(bufio.NewReader(strings.NewReader(output)).ReadString('\n'))
 		if err != nil {
-			printf("%v #r{%s}", now, firstLine)
+			printf("%v: #r{%s}\n", now, output)
 		} else {
-			printf("%v #b{%s}", now, firstLine)
+			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
+			printf("%v: #b{%f} similarity\n", now, similarity)
 		}
 		time.Sleep(interval)
 	}
@@ -211,11 +250,11 @@ func performInactivityTimeoutTest(curlCommand string) {
 		now := time.Now()
 		logFile := strings.ReplaceAll(fmt.Sprintf("inactivity_timeout/%v.txt", now), " ", "_")
 		must(os.WriteFile(logFile, []byte(output), 0644))
-		firstLine := must2(bufio.NewReader(strings.NewReader(output)).ReadString('\n'))
 		if err != nil {
-			printf("%v #r{%s}", now, firstLine)
+			printf("%v: #r{%s}\n", now, output)
 		} else {
-			printf("%v #b{%s}", now, firstLine)
+			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
+			printf("%v: #b{%f} similarity\n", now, similarity)
 		}
 		interval += 15 * time.Minute
 	}
