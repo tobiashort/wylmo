@@ -2,71 +2,124 @@ package main
 
 import (
 	"bufio"
-	"bytes"
+	"flag"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/t-hg/wylmo/assert"
 )
+
+const hardTimeoutTest = "Hard timeout"
+const inactivityTimeoutTest = "Inactivity timeout"
 
 const colorBlue = "\033[38;5;45m"
 const colorRed = "\033[38;5;198m"
 const colorReset = "\033[0;0m"
 
+var noColors bool
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func must2[T any](v T, err error) T {
+	must(err)
+	return v
+}
+
 func blue(text string) string {
+	if noColors {
+		return text
+	}
 	return colorBlue + text + colorReset
 }
 
 func red(text string) string {
+	if noColors {
+		return text
+	}
 	return colorRed + text + colorReset
+}
+
+func beginColor(color string) {
+	if noColors {
+		return
+	}
+	fmt.Print(color)
+}
+
+func endColor() {
+	if noColors {
+		return
+	}
+	fmt.Print(colorReset)
+}
+
+func interpretColorHints(text string) string {
+	reds := regexp.MustCompile("#r\\{([^\\}]*)\\}")
+	blues := regexp.MustCompile("#b\\{([^\\}]*)\\}")
+	if noColors {
+		text = reds.ReplaceAllString(text, "${1}")
+		text = blues.ReplaceAllString(text, "${1}")
+	} else {
+		text = reds.ReplaceAllString(text, red("${1}"))
+		text = blues.ReplaceAllString(text, blue("${1}"))
+	}
+	return text
+}
+
+func println(text string) {
+	fmt.Println(interpretColorHints(text))
+}
+
+func printf(text string, a ...any) {
+	fmt.Printf(interpretColorHints(text), a...)
 }
 
 func readLine() string {
 	reader := bufio.NewReader(os.Stdin)
-	bytesRead, err := reader.ReadString('\n')
-	assert.NoErr(err)
+	bytesRead := must2(reader.ReadString('\n'))
 	return strings.TrimSpace(string(bytesRead))
 }
 
 func readMultiLine() string {
-	bytesRead, err := io.ReadAll(os.Stdin)
-	assert.NoErr(err)
+	bytesRead := must2(io.ReadAll(os.Stdin))
 	return strings.TrimSpace(string(bytesRead))
 }
 
 func choose(text string, choices []string) string {
-	fmt.Println(text)
+	println(text)
 	for index, choice := range choices {
-		fmt.Printf(blue("[%d] %s\n"), index, choice)
+		printf("#b{[%d] %s}\n", index, choice)
 	}
-	fmt.Printf("Please enter your choice (0-%d): ", len(choices)-1)
-	fmt.Printf(colorBlue)
+	printf("Please enter your choice (0-%d): ", len(choices)-1)
+	beginColor(colorBlue)
 	answer := readLine()
-	fmt.Printf(colorReset)
+	endColor()
 	choosen, err := strconv.Atoi(answer)
 	if err != nil {
-		fmt.Println(red("Invalid input. Please try again."))
+		println("#r{Invalid input. Please try again.}")
 		return choose(text, choices)
 	}
 	if choosen < 0 || choosen >= len(choices) {
-		fmt.Println(red("Invalid input. Please try again."))
+		println("#r{Invalid input. Please try again.}")
 		return choose(text, choices)
 	}
 	return choices[choosen]
 }
 
 func yesno(question string) bool {
-	fmt.Print(question + " (y/n) ")
-	fmt.Print(colorBlue)
+	printf(question + " (y/n) ")
+	beginColor(colorBlue)
 	answer := readLine()
+	endColor()
 	answer = strings.ToLower(answer)
-	fmt.Print(colorReset)
 	switch answer {
 	case "y":
 		return true
@@ -77,112 +130,115 @@ func yesno(question string) bool {
 }
 
 func requestCurlCommand() string {
-	fmt.Println("Please enter the curl command and accept with Ctrl-D.")
-	fmt.Print(colorBlue)
+	println("Please enter the curl command and accept with Ctrl-D.")
+	beginColor(colorBlue)
 	curlCommand := readMultiLine()
-	fmt.Print(colorReset)
+	endColor()
 	if !strings.HasPrefix(curlCommand, "curl ") {
-		fmt.Printf(red("Not a curl command: %v\n"), curlCommand)
+		printf("#r{Not a curl command: %v\n}", curlCommand)
 		return requestCurlCommand()
 	}
-	fmt.Println("Testing curl command...")
+	println("Testing curl command...")
 	cmd := exec.Command("bash", "-c", curlCommand)
 	outBytes, err := cmd.CombinedOutput()
 	output := string(outBytes)
 	output = strings.TrimSpace(output)
 	if err != nil {
-		fmt.Println(red("Curl command failed"))
-		fmt.Println(red(err.Error()))
+		println("#r{Curl command failed}")
+		println(red(err.Error()))
 		if output != "" {
-			fmt.Println(red(output))
+			println(red(output))
 		}
 		return requestCurlCommand()
 	}
-	fmt.Println("Curl command was successful.")
-	fmt.Print("Please hit enter to review the curl command's output before continuing")
+	println("Curl command was successful.")
+	printf("Please hit enter to review the curl command's output before continuing")
 	readLine()
-	assert.NoErr(err)
 	cmd = exec.Command("more")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	writer, err := cmd.StdinPipe()
-	assert.NoErr(err)
-	err = cmd.Start()
-	assert.NoErr(err)
-	writer.Write(outBytes)
-	writer.Close()
-	err = cmd.Wait()
-	assert.NoErr(err)
-	ok := yesno("Is the curl command's output ok?")
-	if ok {
+	writer := must2(cmd.StdinPipe())
+	must(cmd.Start())
+	must2(writer.Write(outBytes))
+	must(writer.Close())
+	must(cmd.Wait())
+	if ok := yesno("Is the curl command's output ok?"); ok {
 		return curlCommand
 	}
 	return requestCurlCommand()
 }
 
+func performHardTimeoutTest(curlCommand string) {
+	printf("Performing #b{'%s'} test...\n", hardTimeoutTest)
+	must(os.Mkdir("hard_timeout", 0755))
+	must(os.WriteFile("hard_timeout/curl_command.txt", []byte(curlCommand), 0644))
+	interval := 5 * time.Minute
+	printf("Interval is set to #b{'%v'}\n", interval)
+	for {
+		cmd := exec.Command("bash", "-c", curlCommand)
+		bytesOut, err := cmd.CombinedOutput()
+		output := string(bytesOut)
+		if err != nil {
+			output = err.Error() + "\n" + output
+		}
+		now := time.Now()
+		must(os.WriteFile(fmt.Sprintf("hard_timeout/%v.txt", now), []byte(output), 0644))
+		firstLine := must2(bufio.NewReader(strings.NewReader(output)).ReadString('\n'))
+		if err != nil {
+			printf("%v #r{%s}", now, firstLine)
+		} else {
+			printf("%v #b{%s}", now, firstLine)
+		}
+		time.Sleep(interval)
+	}
+}
+
+func performInactivityTimeoutTest(curlCommand string) {
+	printf("Performing #b{'%s'} test...\n", inactivityTimeoutTest)
+	must(os.Mkdir("inactivity_timeout", 0755))
+	must(os.WriteFile("inactivity_timeout/curl_command.txt", []byte(curlCommand), 0644))
+	interval := 0 * time.Minute
+	for {
+		printf("Waiting for #b{'%v'}\n", interval)
+		time.Sleep(interval)
+		cmd := exec.Command("bash", "-c", curlCommand)
+		bytesOut, err := cmd.CombinedOutput()
+		output := string(bytesOut)
+		if err != nil {
+			output = err.Error() + "\n" + output
+		}
+		now := time.Now()
+		must(os.WriteFile(fmt.Sprintf("inactivity_timeout/%v.txt", now), []byte(output), 0644))
+		firstLine := must2(bufio.NewReader(strings.NewReader(output)).ReadString('\n'))
+		if err != nil {
+			printf("%v #r{%s}", now, firstLine)
+		} else {
+			printf("%v #b{%s}", now, firstLine)
+		}
+		interval += 15 * time.Minute
+	}
+}
+
 func performTest(typeOfTest string, curlCommand string) {
-	assert.True(typeOfTest == "Hard timeout" || typeOfTest == "Inactivity timeout", "unknown type of test: "+typeOfTest)
-	fmt.Println("Performing '" + blue(typeOfTest) + "' test...")
-	start := time.Now()
-	if typeOfTest == "Hard timeout" {
-		err := os.Mkdir("hard_timeout", 0755)
-		if err != nil && !os.IsExist(err) {
-			panic(err)
-		}
-		err = os.WriteFile("hard_timeout/curlCommand.txt", []byte(curlCommand), 0644)
-		assert.NoErr(err)
-		for {
-			now := time.Now()
-			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
-			cmd := exec.Command("bash", "-c", curlCommand)
-			bytesOut, _ := cmd.CombinedOutput()
-			logFile := fmt.Sprintf("hard_timeout/%v.log", now)
-			err = os.WriteFile(logFile, bytesOut, 0644)
-			assert.NoErr(err)
-			response, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(bytesOut)), nil)
-			if err != nil || response.StatusCode > 299 || response.StatusCode < 200 {
-				fmt.Println(red(string(bytesOut)))
-				fmt.Printf(red("Time elapsed: %v\n"), time.Now().Sub(start))
-				break
-			}
-			time.Sleep(5 * time.Minute)
-		}
-	} else {
-		err := os.Mkdir("inactivity_timeout", 0755)
-		if err != nil && !os.IsExist(err) {
-			panic(err)
-		}
-		err = os.WriteFile("inactivity_timeout/curlCommand.txt", []byte(curlCommand), 0644)
-		assert.NoErr(err)
-		var duration time.Duration
-		for {
-			fmt.Printf("Waiting for "+blue("'%v'")+"\n", duration)
-			time.Sleep(duration)
-			now := time.Now()
-			fmt.Printf("It is now "+blue("'%v'")+"\n", now)
-			cmd := exec.Command("bash", "-c", curlCommand)
-			bytesOut, _ := cmd.CombinedOutput()
-			logFile := fmt.Sprintf("inactivity_timeout/%v.log", now)
-			err = os.WriteFile(logFile, bytesOut, 0644)
-			assert.NoErr(err)
-			response, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(bytesOut)), nil)
-			if err != nil || response.StatusCode > 299 || response.StatusCode < 200 {
-				fmt.Println(red(string(bytesOut)))
-				fmt.Printf(red("Time elapsed: %v\n"), time.Now().Sub(start))
-				break
-			}
-			duration += 15 * time.Minute
-		}
+	switch typeOfTest {
+	case hardTimeoutTest:
+		performHardTimeoutTest(curlCommand)
+	case inactivityTimeoutTest:
+		performInactivityTimeoutTest(curlCommand)
+	default:
+		panic("Unknown test to perform: " + typeOfTest)
 	}
 }
 
 func main() {
-	fmt.Println("Welcome to wylmo!")
+	println("Welcome to #b{wylmo}!")
+	flag.BoolVar(&noColors, "nocolors", false, "Disable colored output")
+	flag.Parse()
 	typeOfTest := choose("Please choose the type of test to perform", []string{
-		"Hard timeout",
-		"Inactivity timeout",
+		hardTimeoutTest,
+		inactivityTimeoutTest,
 	})
-	fmt.Printf("Thank you for choosing "+blue("'%s'")+"\n", typeOfTest)
+	printf("Thank you for choosing #b{'%s'}\n", typeOfTest)
 	curlCommand := requestCurlCommand()
 	performTest(typeOfTest, curlCommand)
 }
