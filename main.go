@@ -17,8 +17,8 @@ import (
 const hardTimeoutTest = "Hard timeout"
 const inactivityTimeoutTest = "Inactivity timeout"
 
-const colorBlue = "\033[38;5;45m"
-const colorRed = "\033[38;5;198m"
+const colorMagenta = "\033[1;35m"
+const colorRed = "\033[1;31m"
 const colorReset = "\033[0;0m"
 
 var noColors bool
@@ -41,7 +41,7 @@ func blue(text string) string {
 	if noColors {
 		return text
 	}
-	return colorBlue + text + colorReset
+	return colorMagenta + text + colorReset
 }
 
 func red(text string) string {
@@ -67,7 +67,7 @@ func endColor() {
 
 func interpretColorHints(text string) string {
 	reds := regexp.MustCompile("#r\\{([^\\}]*)\\}")
-	blues := regexp.MustCompile("#b\\{([^\\}]*)\\}")
+	blues := regexp.MustCompile("#m\\{([^\\}]*)\\}")
 	if noColors {
 		text = reds.ReplaceAllString(text, "${1}")
 		text = blues.ReplaceAllString(text, "${1}")
@@ -100,10 +100,10 @@ func readMultiLine() string {
 func choose(text string, choices []string) string {
 	println(text)
 	for index, choice := range choices {
-		printf("#b{[%d] %s}\n", index, choice)
+		printf("#m{[%d] %s}\n", index, choice)
 	}
 	printf("Please enter your choice (0-%d): ", len(choices)-1)
-	beginColor(colorBlue)
+	beginColor(colorMagenta)
 	answer := readLine()
 	endColor()
 	choosen, err := strconv.Atoi(answer)
@@ -120,7 +120,7 @@ func choose(text string, choices []string) string {
 
 func yesno(question string) bool {
 	printf(question + " (y/n) ")
-	beginColor(colorBlue)
+	beginColor(colorMagenta)
 	answer := readLine()
 	endColor()
 	answer = strings.ToLower(answer)
@@ -135,7 +135,7 @@ func yesno(question string) bool {
 
 func requestCurlCommand() string {
 	println("Please enter the curl command and accept with Ctrl-D.")
-	beginColor(colorBlue)
+	beginColor(colorMagenta)
 	curlCommand := readMultiLine()
 	endColor()
 	if !strings.HasPrefix(curlCommand, "curl ") {
@@ -208,11 +208,21 @@ func cosineSimilarity(vec1, vec2 map[string]float64) float64 {
 }
 
 func performHardTimeoutTest(curlCommand string) {
-	printf("Performing #b{'%s'} test...\n", hardTimeoutTest)
+	printf("Performing #m{'%s'} test...\n", hardTimeoutTest)
+	if _, err := os.Stat("hard_timeout"); err == nil {
+		if yesno("Remove previous test results?") {
+			must(os.RemoveAll("hard_timeout"))
+		} else {
+			printf("Abort.\n")
+			os.Exit(1)
+		}
+	}
 	must(os.Mkdir("hard_timeout", 0755))
 	must(os.WriteFile("hard_timeout/curl_command.txt", []byte(curlCommand), 0644))
+	logFile := must2(os.OpenFile("hard_timeout/log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
+	defer logFile.Close()
 	interval := 5 * time.Minute
-	printf("Interval is set to #b{'%v'}\n", interval)
+	printf("Interval is set to #m{'%v'}\n", interval)
 	for {
 		cmd := exec.Command("bash", "-c", curlCommand)
 		bytesOut, err := cmd.CombinedOutput()
@@ -221,25 +231,37 @@ func performHardTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		logFile := strings.ReplaceAll(fmt.Sprintf("hard_timeout/%v.txt", now), " ", "_")
-		must(os.WriteFile(logFile, []byte(output), 0644))
+		curlLogFile := fmt.Sprintf("hard_timeout/%v.txt", now)
+		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v: #r{%s}\n", now, output)
+			printf("%v\t#r{%s}\n", now, output)
+			must2(logFile.WriteString(fmt.Sprintf("%v\t%s\n", now, output)))
 		} else {
 			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
-			printf("%v: #b{%f} similarity\n", now, similarity)
+			printf("%v\t#m{%f} similarity\n", now, similarity)
+			must2(logFile.WriteString(fmt.Sprintf("%v\t%f similarity\n", now, similarity)))
 		}
 		time.Sleep(interval)
 	}
 }
 
 func performInactivityTimeoutTest(curlCommand string) {
-	printf("Performing #b{'%s'} test...\n", inactivityTimeoutTest)
+	printf("Performing #m{'%s'} test...\n", inactivityTimeoutTest)
+	if _, err := os.Stat("inactivity_timeout"); err == nil {
+		if yesno("Remove previous test results?") {
+			must(os.RemoveAll("inactivity_timeout"))
+		} else {
+			printf("Abort.\n")
+			os.Exit(1)
+		}
+	}
 	must(os.Mkdir("inactivity_timeout", 0755))
 	must(os.WriteFile("inactivity_timeout/curl_command.txt", []byte(curlCommand), 0644))
+	logFile := must2(os.OpenFile("inactivity_timeout/log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
+	defer logFile.Close()
 	interval := 0 * time.Minute
 	for {
-		printf("Waiting for #b{'%v'}\n", interval)
+		printf("Waiting for #m{'%v'}\n", interval)
 		time.Sleep(interval)
 		cmd := exec.Command("bash", "-c", curlCommand)
 		bytesOut, err := cmd.CombinedOutput()
@@ -248,13 +270,15 @@ func performInactivityTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		logFile := strings.ReplaceAll(fmt.Sprintf("inactivity_timeout/%v.txt", now), " ", "_")
-		must(os.WriteFile(logFile, []byte(output), 0644))
+		curlLogFile := fmt.Sprintf("inactivity_timeout/%v.txt", now)
+		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v: #r{%s}\n", now, output)
+			printf("%v\t#r{%s}\n", now, output)
+			must2(logFile.WriteString(fmt.Sprintf("%v\t%s\n", now, output)))
 		} else {
 			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
-			printf("%v: #b{%f} similarity\n", now, similarity)
+			printf("%v\t#m{%f} similarity\n", now, similarity)
+			must2(logFile.WriteString(fmt.Sprintf("%v\t%f similarity\n", now, similarity)))
 		}
 		interval += 15 * time.Minute
 	}
@@ -272,14 +296,15 @@ func performTest(typeOfTest string, curlCommand string) {
 }
 
 func main() {
-	println("Welcome to #b{wylmo}!")
+	defer fmt.Print(colorReset)
+	println("Welcome to #m{wylmo}!")
 	flag.BoolVar(&noColors, "nocolors", false, "Disable colored output")
 	flag.Parse()
 	typeOfTest := choose("Please choose the type of test to perform", []string{
 		hardTimeoutTest,
 		inactivityTimeoutTest,
 	})
-	printf("Thank you for choosing #b{'%s'}\n", typeOfTest)
+	printf("Thank you for choosing #m{'%s'}\n", typeOfTest)
 	curlCommand := requestCurlCommand()
 	performTest(typeOfTest, curlCommand)
 }
