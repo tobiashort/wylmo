@@ -8,9 +8,11 @@ import (
 	"math"
 	"os"
 	"os/exec"
+	"os/signal"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -296,7 +298,14 @@ func performTest(typeOfTest string, curlCommand string) {
 }
 
 func main() {
-	defer fmt.Print(colorReset)
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		printf(colorReset)
+		printf("\nAbort.\n")
+		os.Exit(1)
+	}()
 	println("Welcome to #m{wylmo}!")
 	flag.BoolVar(&noColors, "nocolors", false, "Disable colored output")
 	flag.Parse()
