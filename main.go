@@ -236,12 +236,12 @@ func performHardTimeoutTest(curlCommand string) {
 		curlLogFile := fmt.Sprintf("hard_timeout/%v.txt", now)
 		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v\t#r{%s}\n", now, output)
-			must2(logFile.WriteString(fmt.Sprintf("%v\t%s\n", now, output)))
+			printf("%v #r{%s}\n", now, output)
+			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", now, output)))
 		} else {
 			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
-			printf("%v\t#m{%f} similarity\n", now, similarity)
-			must2(logFile.WriteString(fmt.Sprintf("%v\t%f similarity\n", now, similarity)))
+			printf("%v #m{%f} similarity\n", now, similarity)
+			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", now, similarity)))
 		}
 		time.Sleep(interval)
 	}
@@ -275,12 +275,12 @@ func performInactivityTimeoutTest(curlCommand string) {
 		curlLogFile := fmt.Sprintf("inactivity_timeout/%v.txt", now)
 		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v\t#r{%s}\n", now, output)
-			must2(logFile.WriteString(fmt.Sprintf("%v\t%s\n", now, output)))
+			printf("%v #r{%s}\n", now, output)
+			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", now, output)))
 		} else {
 			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
-			printf("%v\t#m{%f} similarity\n", now, similarity)
-			must2(logFile.WriteString(fmt.Sprintf("%v\t%f similarity\n", now, similarity)))
+			printf("%v #m{%f} similarity\n", now, similarity)
+			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", now, similarity)))
 		}
 		interval += 15 * time.Minute
 	}
