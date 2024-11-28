@@ -23,12 +23,13 @@ const colorMagenta = "\033[1;35m"
 const colorRed = "\033[1;31m"
 const colorReset = "\033[0;0m"
 
-var startTime = time.Now()
-
-var noColors bool
+var noColorsFlag bool
+var intervalFlag time.Duration
 
 var referenceResponse string
 var referenceResponseVec map[string]float64
+
+var startTime = time.Now()
 
 func must(err error) {
 	if err != nil {
@@ -42,28 +43,28 @@ func must2[T any](v T, err error) T {
 }
 
 func blue(text string) string {
-	if noColors {
+	if noColorsFlag {
 		return text
 	}
 	return colorMagenta + text + colorReset
 }
 
 func red(text string) string {
-	if noColors {
+	if noColorsFlag {
 		return text
 	}
 	return colorRed + text + colorReset
 }
 
 func beginColor(color string) {
-	if noColors {
+	if noColorsFlag {
 		return
 	}
 	fmt.Print(color)
 }
 
 func endColor() {
-	if noColors {
+	if noColorsFlag {
 		return
 	}
 	fmt.Print(colorReset)
@@ -72,7 +73,7 @@ func endColor() {
 func interpretColorHints(text string) string {
 	reds := regexp.MustCompile("#r\\{([^\\}]*)\\}")
 	blues := regexp.MustCompile("#m\\{([^\\}]*)\\}")
-	if noColors {
+	if noColorsFlag {
 		text = reds.ReplaceAllString(text, "${1}")
 		text = blues.ReplaceAllString(text, "${1}")
 	} else {
@@ -230,7 +231,10 @@ func performHardTimeoutTest(curlCommand string) {
 	must(os.WriteFile("hard_timeout/curl_command", []byte(curlCommand), 0644))
 	logFile := must2(os.OpenFile("hard_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
 	defer logFile.Close()
-	interval := 5 * time.Minute
+	interval := intervalFlag
+	if interval == 0 {
+		interval = 5 * time.Minute
+	}
 	printf("Interval is set to #m{'%v'}\n", interval)
 	startTime = time.Now()
 	for {
@@ -291,7 +295,11 @@ func performInactivityTimeoutTest(curlCommand string) {
 			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
 			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
-		interval += 15 * time.Minute
+		if intervalFlag == 0 {
+			interval += 15 * time.Minute
+		} else {
+			interval += intervalFlag
+		}
 	}
 }
 
@@ -316,7 +324,8 @@ func main() {
 		os.Exit(1)
 	}()
 	println("Welcome to #m{wylmo}!")
-	flag.BoolVar(&noColors, "nocolors", false, "Disable colored output")
+	flag.BoolVar(&noColorsFlag, "nocolors", false, "Disable colored output")
+	flag.DurationVar(&intervalFlag, "interval", 0, "Timeout interval in minutes (default: 5min for hard timeout, 15min for inactivity timeout).")
 	flag.Parse()
 	typeOfTest := choose("Please choose the type of test to perform", []string{
 		hardTimeoutTest,
