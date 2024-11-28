@@ -220,8 +220,8 @@ func performHardTimeoutTest(curlCommand string) {
 		}
 	}
 	must(os.Mkdir("hard_timeout", 0755))
-	must(os.WriteFile("hard_timeout/curl_command.txt", []byte(curlCommand), 0644))
-	logFile := must2(os.OpenFile("hard_timeout/log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
+	must(os.WriteFile("hard_timeout/curl_command", []byte(curlCommand), 0644))
+	logFile := must2(os.OpenFile("hard_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
 	defer logFile.Close()
 	interval := 5 * time.Minute
 	printf("Interval is set to #m{'%v'}\n", interval)
@@ -233,7 +233,7 @@ func performHardTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		curlLogFile := fmt.Sprintf("hard_timeout/%v.txt", now)
+		curlLogFile := fmt.Sprintf("hard_timeout/%v", now)
 		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
 			printf("%v #r{%s}\n", now, output)
@@ -258,8 +258,8 @@ func performInactivityTimeoutTest(curlCommand string) {
 		}
 	}
 	must(os.Mkdir("inactivity_timeout", 0755))
-	must(os.WriteFile("inactivity_timeout/curl_command.txt", []byte(curlCommand), 0644))
-	logFile := must2(os.OpenFile("inactivity_timeout/log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
+	must(os.WriteFile("inactivity_timeout/curl_command", []byte(curlCommand), 0644))
+	logFile := must2(os.OpenFile("inactivity_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
 	defer logFile.Close()
 	interval := 0 * time.Minute
 	for {
@@ -272,7 +272,7 @@ func performInactivityTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		curlLogFile := fmt.Sprintf("inactivity_timeout/%v.txt", now)
+		curlLogFile := fmt.Sprintf("inactivity_timeout/%v", now)
 		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
 			printf("%v #r{%s}\n", now, output)
