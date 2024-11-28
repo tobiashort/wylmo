@@ -23,6 +23,8 @@ const colorMagenta = "\033[1;35m"
 const colorRed = "\033[1;31m"
 const colorReset = "\033[0;0m"
 
+var startTime = time.Now()
+
 var noColors bool
 
 var referenceResponse string
@@ -135,6 +137,11 @@ func yesno(question string) bool {
 	return yesno(question)
 }
 
+func formatTime(t time.Time) string {
+	elapsed := t.Sub(startTime)
+	return fmt.Sprintf("%s +%s", t.Format("2006-01-02 15-04-05"), elapsed)
+}
+
 func requestCurlCommand() string {
 	println("Please enter the curl command and accept with Ctrl-D.")
 	beginColor(colorMagenta)
@@ -233,15 +240,15 @@ func performHardTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		curlLogFile := fmt.Sprintf("hard_timeout/%v", now)
+		curlLogFile := fmt.Sprintf("hard_timeout/%v", formatTime(now))
 		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v #r{%s}\n", now, output)
-			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", now, output)))
+			printf("%v #r{%s}\n", formatTime(now), output)
+			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
 			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
-			printf("%v #m{%f} similarity\n", now, similarity)
-			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", now, similarity)))
+			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
+			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
 		time.Sleep(interval)
 	}
@@ -272,15 +279,15 @@ func performInactivityTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		curlLogFile := fmt.Sprintf("inactivity_timeout/%v", now)
+		curlLogFile := fmt.Sprintf("inactivity_timeout/%v", formatTime(now))
 		must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v #r{%s}\n", now, output)
-			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", now, output)))
+			printf("%v #r{%s}\n", formatTime(now), output)
+			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
 			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
-			printf("%v #m{%f} similarity\n", now, similarity)
-			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", now, similarity)))
+			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
+			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
 		interval += 15 * time.Minute
 	}
