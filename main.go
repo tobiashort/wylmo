@@ -232,6 +232,7 @@ func performHardTimeoutTest(curlCommand string) {
 	defer logFile.Close()
 	interval := 5 * time.Minute
 	printf("Interval is set to #m{'%v'}\n", interval)
+	startTime = time.Now()
 	for {
 		cmd := exec.Command("bash", "-c", curlCommand)
 		bytesOut, err := cmd.CombinedOutput()
@@ -269,6 +270,7 @@ func performInactivityTimeoutTest(curlCommand string) {
 	logFile := must2(os.OpenFile("inactivity_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
 	defer logFile.Close()
 	interval := 0 * time.Minute
+	startTime = time.Now()
 	for {
 		printf("Waiting for #m{'%v'}\n", interval)
 		time.Sleep(interval)
