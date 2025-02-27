@@ -14,6 +14,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/tobiashort/orderedmap"
 )
 
 const hardTimeoutTest = "Hard timeout"
@@ -27,7 +29,6 @@ var noColorsFlag bool
 var intervalFlag time.Duration
 
 var referenceResponse string
-var referenceResponseVec map[string]float64
 
 var startTime = time.Now()
 
@@ -178,38 +179,48 @@ func requestCurlCommand() string {
 	must(cmd.Wait())
 	if ok := yesno("Is the curl command's output ok?"); ok {
 		referenceResponse = string(outBytes)
-		referenceResponseVec = text2vec(referenceResponse)
 		return curlCommand
 	}
 	return requestCurlCommand()
 }
 
-func text2vec(text string) map[string]float64 {
-	vec := make(map[string]float64)
-	for _, field := range strings.Fields(text) {
-		count := vec[field]
-		count++
-		vec[field] = count
+func cosineSimilarity(s1, s2 string) float64 {
+	words1 := strings.Fields(s1)
+	words2 := strings.Fields(s2)
+	dict := make(map[string]bool)
+	for _, word := range words1 {
+		dict[word] = true
 	}
-	return vec
-}
-
-func cosineSimilarity(vec1, vec2 map[string]float64) float64 {
-	biggerVec := vec1
-	if len(vec2) > len(vec1) {
-		biggerVec = vec2
+	for _, word := range words2 {
+		dict[word] = true
+	}
+	vec1 := orderedmap.NewOrderedMap[string, float64]()
+	vec2 := orderedmap.NewOrderedMap[string, float64]()
+	for word := range dict {
+		vec1.Put(word, 0)
+		vec2.Put(word, 0)
+	}
+	for _, word := range words1 {
+		count, _ := vec1.Get(word)
+		vec1.Put(word, count+1)
+	}
+	for _, word := range words2 {
+		count, _ := vec2.Get(word)
+		vec2.Put(word, count+1)
 	}
 	var divident float64
-	for key := range biggerVec {
-		divident += vec1[key] * vec2[key]
+	for word := range dict {
+		count1, _ := vec1.Get(word)
+		count2, _ := vec2.Get(word)
+		divident += count1 * count2
 	}
 	var divisorPart1 float64
-	for _, value := range vec1 {
+	for _, value := range vec1.Iterate() {
 		divisorPart1 += value * value
 	}
 	divisorPart1 = math.Sqrt(divisorPart1)
 	var divisorPart2 float64
-	for _, value := range vec2 {
+	for _, value := range vec2.Iterate() {
 		divisorPart2 += value * value
 	}
 	divisorPart2 = math.Sqrt(divisorPart2)
@@ -251,7 +262,7 @@ func performHardTimeoutTest(curlCommand string) {
 			printf("%v #r{%s}\n", formatTime(now), output)
 			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
-			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
+			similarity := cosineSimilarity(referenceResponse, output)
 			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
 			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
@@ -291,7 +302,7 @@ func performInactivityTimeoutTest(curlCommand string) {
 			printf("%v #r{%s}\n", formatTime(now), output)
 			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
-			similarity := cosineSimilarity(referenceResponseVec, text2vec(output))
+			similarity := cosineSimilarity(referenceResponse, output)
 			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
 			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
