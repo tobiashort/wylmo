@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -15,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tobiashort/orderedmap"
+	. "github.com/tobiashort/cosine-similarity"
 )
 
 const hardTimeoutTest = "Hard timeout"
@@ -184,50 +183,6 @@ func requestCurlCommand() string {
 	return requestCurlCommand()
 }
 
-func cosineSimilarity(s1, s2 string) float64 {
-	words1 := strings.Fields(s1)
-	words2 := strings.Fields(s2)
-	dict := make(map[string]bool)
-	for _, word := range words1 {
-		dict[word] = true
-	}
-	for _, word := range words2 {
-		dict[word] = true
-	}
-	vec1 := orderedmap.NewOrderedMap[string, float64]()
-	vec2 := orderedmap.NewOrderedMap[string, float64]()
-	for word := range dict {
-		vec1.Put(word, 0)
-		vec2.Put(word, 0)
-	}
-	for _, word := range words1 {
-		count, _ := vec1.Get(word)
-		vec1.Put(word, count+1)
-	}
-	for _, word := range words2 {
-		count, _ := vec2.Get(word)
-		vec2.Put(word, count+1)
-	}
-	var divident float64
-	for word := range dict {
-		count1, _ := vec1.Get(word)
-		count2, _ := vec2.Get(word)
-		divident += count1 * count2
-	}
-	var divisorPart1 float64
-	for _, value := range vec1.Iterate() {
-		divisorPart1 += value * value
-	}
-	divisorPart1 = math.Sqrt(divisorPart1)
-	var divisorPart2 float64
-	for _, value := range vec2.Iterate() {
-		divisorPart2 += value * value
-	}
-	divisorPart2 = math.Sqrt(divisorPart2)
-	divisor := divisorPart1 * divisorPart2
-	return divident / divisor
-}
-
 func performHardTimeoutTest(curlCommand string) {
 	printf("Performing #m{'%s'} test...\n", hardTimeoutTest)
 	if _, err := os.Stat("hard_timeout"); err == nil {
@@ -262,7 +217,7 @@ func performHardTimeoutTest(curlCommand string) {
 			printf("%v #r{%s}\n", formatTime(now), output)
 			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
-			similarity := cosineSimilarity(referenceResponse, output)
+			similarity := CosineSimilarity(referenceResponse, output)
 			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
 			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
@@ -302,7 +257,7 @@ func performInactivityTimeoutTest(curlCommand string) {
 			printf("%v #r{%s}\n", formatTime(now), output)
 			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
-			similarity := cosineSimilarity(referenceResponse, output)
+			similarity := CosineSimilarity(referenceResponse, output)
 			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
 			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}

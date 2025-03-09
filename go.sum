@@ -1,2 +1,4 @@
-github.com/tobiashort/orderedmap v0.0.0-20250122204835-72c476b76f48 h1:C5iZidKWhNX4hZRP7NDgXvrFeoaO8UWrzTnkDSIbSg0=
-github.com/tobiashort/orderedmap v0.0.0-20250122204835-72c476b76f48/go.mod h1:2UQJLhoAfeK36ngcZKzDg3+9uxO1D/EVR5AxjYfifCA=
+github.com/tobiashort/cosine-similarity v0.0.0-20250309080244-0acb9f48060e h1:F1A/tN2GioCL/+9A5W2scItBhWbdxYqFj+kshhqnz9w=
+github.com/tobiashort/cosine-similarity v0.0.0-20250309080244-0acb9f48060e/go.mod h1:ZWbBmHOzUivM0vrUByc5ZyhaCIEvF0F61XHcNNlADlk=
+github.com/tobiashort/orderedmap v0.0.0-20250308064507-ecaf453f8638 h1:QgPz0XswKh7VhQg3omZAKFIES5FAULFK55ZZCCA4kp8=
+github.com/tobiashort/orderedmap v0.0.0-20250308064507-ecaf453f8638/go.mod h1:2UQJLhoAfeK36ngcZKzDg3+9uxO1D/EVR5AxjYfifCA=
