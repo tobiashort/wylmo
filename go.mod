@@ -1,7 +1,7 @@
 module github.com/tobiashort/wylmo
 
-go 1.23.6
+go 1.24
 
-require github.com/tobiashort/orderedmap v0.0.0-20250308064507-ecaf453f8638 // indirect
+require github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd
 
-require github.com/tobiashort/cosine-similarity v0.0.0-20250309080244-0acb9f48060e
+require github.com/tobiashort/orderedmap-go v0.0.0-20250729190624-ec8e8c7a251e // indirect

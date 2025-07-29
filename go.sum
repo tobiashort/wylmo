@@ -1,4 +1,4 @@
-github.com/tobiashort/cosine-similarity v0.0.0-20250309080244-0acb9f48060e h1:F1A/tN2GioCL/+9A5W2scItBhWbdxYqFj+kshhqnz9w=
-github.com/tobiashort/cosine-similarity v0.0.0-20250309080244-0acb9f48060e/go.mod h1:ZWbBmHOzUivM0vrUByc5ZyhaCIEvF0F61XHcNNlADlk=
-github.com/tobiashort/orderedmap v0.0.0-20250308064507-ecaf453f8638 h1:QgPz0XswKh7VhQg3omZAKFIES5FAULFK55ZZCCA4kp8=
-github.com/tobiashort/orderedmap v0.0.0-20250308064507-ecaf453f8638/go.mod h1:2UQJLhoAfeK36ngcZKzDg3+9uxO1D/EVR5AxjYfifCA=
+github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd h1:lqt2Eqx8kWzGbvX4brp60vqpRP/bIpf2MDXtzLQIuXg=
+github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd/go.mod h1:uECLcL8VDEAlclY+lWYCHpdZmu8ckRbW7om78w18u7o=
+github.com/tobiashort/orderedmap-go v0.0.0-20250729190624-ec8e8c7a251e h1:+wLWwLoGXo8JB4UO+EYvD5MsuXBLpn4i/T+UKrnXg3w=
+github.com/tobiashort/orderedmap-go v0.0.0-20250729190624-ec8e8c7a251e/go.mod h1:m2nzlh5XDU90UIVgY0mgGWFwObspBf7GeVF6DRUU0fY=

@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	. "github.com/tobiashort/cosine-similarity"
+	. "github.com/tobiashort/cosine-similarity-go"
 )
 
 const hardTimeoutTest = "Hard timeout"
