@@ -29,7 +29,7 @@ type Args struct {
 }
 
 var (
-	intervalFlag      time.Duration
+	intervalArg       time.Duration
 	referenceResponse string
 	startTime         = time.Now()
 )
@@ -140,7 +140,7 @@ func performHardTimeoutTest(curlCommand string) {
 	Must(os.WriteFile("hard_timeout/curl_command", []byte(curlCommand), 0644))
 	logFile := Must2(os.OpenFile("hard_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
 	defer logFile.Close()
-	interval := intervalFlag
+	interval := intervalArg
 	if interval == 0 {
 		interval = 5 * time.Minute
 	}
@@ -204,10 +204,10 @@ func performInactivityTimeoutTest(curlCommand string) {
 			cfmt.Printf("%v #p{%f} similarity\n", formatTime(now), similarity)
 			Must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
-		if intervalFlag == 0 {
+		if intervalArg == 0 {
 			interval += 15 * time.Minute
 		} else {
-			interval += intervalFlag
+			interval += intervalArg
 		}
 	}
 }
@@ -232,9 +232,13 @@ func main() {
 		fmt.Printf("\nAbort.\n")
 		os.Exit(1)
 	}()
+
 	cfmt.Println("Welcome to #p{wylmo}!")
+
 	args := Args{}
 	clap.Parse(&args)
+	intervalArg = args.Interval
+
 	typeOfTest := choose("Please choose the type of test to perform", []string{
 		hardTimeoutTest,
 		inactivityTimeoutTest,

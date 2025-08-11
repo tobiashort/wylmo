@@ -2,8 +2,8 @@ github.com/tobiashort/ansi-go v0.0.0-20250806124809-2629ce31199d h1:KCznFY8B2c+H
 github.com/tobiashort/ansi-go v0.0.0-20250806124809-2629ce31199d/go.mod h1:yPoTE564mrx3g7842t9vvduaGlzo38iKRjIqtGANbyU=
 github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5 h1:c0ofytvJ1jn9Aanz8sQwVY5sPGjfEzztdgr09siRIyA=
 github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5/go.mod h1:8pFtdCkzBpY6F+Kmqs+Mi7IJL7ysW+lershVsCLWMcc=
-github.com/tobiashort/clap-go v0.0.0-20250807203524-ab844a28f97b h1:LK8uZ2JXlUppWIa+hmaN4MABKhdUlmvLW3qBvcGp+bE=
-github.com/tobiashort/clap-go v0.0.0-20250807203524-ab844a28f97b/go.mod h1:fXe6AMsDK0lviUTf5sJKXxfH/m5+KGbcK1jbNwy9Bd8=
+github.com/tobiashort/clap-go v0.0.0-20250811184348-dfc140d2a01a h1:MHyD7CDvVc3X+f5C7gKiDDZnCTk0JQaIPESpE6Vq5zk=
+github.com/tobiashort/clap-go v0.0.0-20250811184348-dfc140d2a01a/go.mod h1:fXe6AMsDK0lviUTf5sJKXxfH/m5+KGbcK1jbNwy9Bd8=
 github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd h1:lqt2Eqx8kWzGbvX4brp60vqpRP/bIpf2MDXtzLQIuXg=
 github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd/go.mod h1:uECLcL8VDEAlclY+lWYCHpdZmu8ckRbW7om78w18u7o=
 github.com/tobiashort/isatty-go v0.0.0-20250729193227-00bbda39413c h1:bHu0yDhCDLYWwUvEf+5KUOzb2VNX8F5E046AWbHkHeY=
