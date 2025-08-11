@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"runtime/debug"
 	"strings"
+
+	. "github.com/tobiashort/utils-go/must"
 )
 
 type OrderedMap[K comparable, V any] struct {
@@ -92,28 +94,20 @@ func (m *OrderedMap[K, V]) UnmarshalJSON(data []byte) (err error) {
 		}
 	}()
 
-	assertNil := func(v any) {
-		if v != nil {
-			panic(v)
-		}
-	}
-
 	m.keys = make([]K, 0)
 	m.keyValues = make(map[K]V)
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 
 	// parse {
-	token, err := decoder.Token()
-	assertNil(err)
+	token := Must2(decoder.Token())
 	if token != json.Delim('{') {
 		return fmt.Errorf("at %d expected '{', got '%s'", decoder.InputOffset(), token)
 	}
 
 next:
 	// parse }
-	token, err = decoder.Token()
-	assertNil(err)
+	token = Must2(decoder.Token())
 	if token == json.Delim('}') {
 		return nil
 	}
@@ -123,12 +117,10 @@ next:
 
 	// parse value
 	var valueRaw json.RawMessage
-	err = decoder.Decode(&valueRaw)
-	assertNil(err)
+	Must(decoder.Decode(&valueRaw))
 
 	var valueCompacted bytes.Buffer
-	err = json.Compact(&valueCompacted, valueRaw)
-	assertNil(err)
+	Must(json.Compact(&valueCompacted, valueRaw))
 
 	valueStr := valueCompacted.String()
 
@@ -140,32 +132,27 @@ next:
 	isStringToAny := reflect.TypeOf(m) == reflect.TypeOf(NewOrderedMap[string, any]())
 	if isStringToAny && strings.HasPrefix(valueStr, "{") {
 		var omap OrderedMap[K, V]
-		err = json.Unmarshal([]byte(valueStr), &omap)
-		assertNil(err)
+		Must(json.Unmarshal([]byte(valueStr), &omap))
 		value = omap
 	} else if isStringToAny && strings.HasPrefix(valueStr, "[{") {
 		var omaps []OrderedMap[K, V]
-		err = json.Unmarshal([]byte(valueStr), &omaps)
-		assertNil(err)
+		Must(json.Unmarshal([]byte(valueStr), &omaps))
 		value = omaps
 	} else if strings.HasPrefix(valueStr, "{") {
 		// if current OrderedMap is of type [string, V],
 		// subsequent json object shall be unmarshaled to
 		// the concrete type V
 		var tmp V
-		err = json.Unmarshal([]byte(valueStr), &tmp)
-		assertNil(err)
+		Must(json.Unmarshal([]byte(valueStr), &tmp))
 		value = tmp
 	} else if strings.HasPrefix(valueStr, "[{") {
 		var tmp []V
-		err = json.Unmarshal([]byte(valueStr), &tmp)
-		assertNil(err)
+		Must(json.Unmarshal([]byte(valueStr), &tmp))
 		value = tmp
 	} else {
 		// in any other case the valueStr shall be unmarshaled
 		// to whatever type it may be (int, float, bool, str, etc.)
-		err = json.Unmarshal([]byte(valueStr), &value)
-		assertNil(err)
+		Must(json.Unmarshal([]byte(valueStr), &value))
 	}
 
 	// add key and value

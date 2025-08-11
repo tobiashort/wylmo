@@ -1,4 +1,14 @@
+github.com/tobiashort/ansi-go v0.0.0-20250806124809-2629ce31199d h1:KCznFY8B2c+HW83hT67OEDLmNA4t5sEGrjHVDLA6ZhY=
+github.com/tobiashort/ansi-go v0.0.0-20250806124809-2629ce31199d/go.mod h1:yPoTE564mrx3g7842t9vvduaGlzo38iKRjIqtGANbyU=
+github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5 h1:c0ofytvJ1jn9Aanz8sQwVY5sPGjfEzztdgr09siRIyA=
+github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5/go.mod h1:8pFtdCkzBpY6F+Kmqs+Mi7IJL7ysW+lershVsCLWMcc=
+github.com/tobiashort/clap-go v0.0.0-20250807203524-ab844a28f97b h1:LK8uZ2JXlUppWIa+hmaN4MABKhdUlmvLW3qBvcGp+bE=
+github.com/tobiashort/clap-go v0.0.0-20250807203524-ab844a28f97b/go.mod h1:fXe6AMsDK0lviUTf5sJKXxfH/m5+KGbcK1jbNwy9Bd8=
 github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd h1:lqt2Eqx8kWzGbvX4brp60vqpRP/bIpf2MDXtzLQIuXg=
 github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd/go.mod h1:uECLcL8VDEAlclY+lWYCHpdZmu8ckRbW7om78w18u7o=
-github.com/tobiashort/orderedmap-go v0.0.0-20250729190624-ec8e8c7a251e h1:+wLWwLoGXo8JB4UO+EYvD5MsuXBLpn4i/T+UKrnXg3w=
-github.com/tobiashort/orderedmap-go v0.0.0-20250729190624-ec8e8c7a251e/go.mod h1:m2nzlh5XDU90UIVgY0mgGWFwObspBf7GeVF6DRUU0fY=
+github.com/tobiashort/isatty-go v0.0.0-20250729193227-00bbda39413c h1:bHu0yDhCDLYWwUvEf+5KUOzb2VNX8F5E046AWbHkHeY=
+github.com/tobiashort/isatty-go v0.0.0-20250729193227-00bbda39413c/go.mod h1:SR1HPbCAU42WyNiMZUkT4uaFR0BhWEUI++hmevlg46Y=
+github.com/tobiashort/orderedmap-go v0.0.0-20250808211554-a621a4f4674c h1:59UJ5j5oU2Bh4zujC1i/uFlNlzfUgGCbWcPSYsLbFYc=
+github.com/tobiashort/orderedmap-go v0.0.0-20250808211554-a621a4f4674c/go.mod h1:2UXuS6N03zbjxIxA+NaUvoFGF7H5fsrfYShgYIYJC/o=
+github.com/tobiashort/utils-go v0.0.0-20250809133151-e63ee93a3da7 h1:p7rx4hxWGQsRTd8jxcwXn6VTKb4kWcyeBI8Ep50ocRs=
+github.com/tobiashort/utils-go v0.0.0-20250809133151-e63ee93a3da7/go.mod h1:3wsCtfMiXqp06v1rGwOpa8djcN7gBE1aVW7AobOjJBE=

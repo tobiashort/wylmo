@@ -2,132 +2,75 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"os/signal"
-	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/tobiashort/ansi-go"
+	"github.com/tobiashort/cfmt-go"
+	"github.com/tobiashort/clap-go"
 	. "github.com/tobiashort/cosine-similarity-go"
+	. "github.com/tobiashort/utils-go/must"
 )
 
-const hardTimeoutTest = "Hard timeout"
-const inactivityTimeoutTest = "Inactivity timeout"
+const (
+	hardTimeoutTest       = "Hard timeout"
+	inactivityTimeoutTest = "Inactivity timeout"
+)
 
-const colorMagenta = "\033[1;35m"
-const colorRed = "\033[1;31m"
-const colorReset = "\033[0;0m"
-
-var noColorsFlag bool
-var intervalFlag time.Duration
-
-var referenceResponse string
-
-var startTime = time.Now()
-
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
+type Args struct {
+	Interval time.Duration `clap:"description='Timeout interval in minutes (default: 5min for hard timeout, 15min for inactivity timeout).'"`
 }
 
-func must2[T any](v T, err error) T {
-	must(err)
-	return v
-}
-
-func blue(text string) string {
-	if noColorsFlag {
-		return text
-	}
-	return colorMagenta + text + colorReset
-}
-
-func red(text string) string {
-	if noColorsFlag {
-		return text
-	}
-	return colorRed + text + colorReset
-}
-
-func beginColor(color string) {
-	if noColorsFlag {
-		return
-	}
-	fmt.Print(color)
-}
-
-func endColor() {
-	if noColorsFlag {
-		return
-	}
-	fmt.Print(colorReset)
-}
-
-func interpretColorHints(text string) string {
-	reds := regexp.MustCompile("#r\\{([^\\}]*)\\}")
-	blues := regexp.MustCompile("#m\\{([^\\}]*)\\}")
-	if noColorsFlag {
-		text = reds.ReplaceAllString(text, "${1}")
-		text = blues.ReplaceAllString(text, "${1}")
-	} else {
-		text = reds.ReplaceAllString(text, red("${1}"))
-		text = blues.ReplaceAllString(text, blue("${1}"))
-	}
-	return text
-}
-
-func println(text string) {
-	fmt.Println(interpretColorHints(text))
-}
-
-func printf(text string, a ...any) {
-	fmt.Printf(interpretColorHints(text), a...)
-}
+var (
+	intervalFlag      time.Duration
+	referenceResponse string
+	startTime         = time.Now()
+)
 
 func readLine() string {
 	reader := bufio.NewReader(os.Stdin)
-	bytesRead := must2(reader.ReadString('\n'))
+	bytesRead := Must2(reader.ReadString('\n'))
 	return strings.TrimSpace(string(bytesRead))
 }
 
 func readMultiLine() string {
-	bytesRead := must2(io.ReadAll(os.Stdin))
+	bytesRead := Must2(io.ReadAll(os.Stdin))
 	return strings.TrimSpace(string(bytesRead))
 }
 
 func choose(text string, choices []string) string {
-	println(text)
+	fmt.Println(text)
 	for index, choice := range choices {
-		printf("#m{[%d] %s}\n", index, choice)
+		cfmt.Printf("#p{[%d] %s}\n", index, choice)
 	}
-	printf("Please enter your choice (0-%d): ", len(choices)-1)
-	beginColor(colorMagenta)
+	fmt.Printf("Please enter your choice (0-%d): ", len(choices)-1)
+	cfmt.Begin(ansi.Purple)
 	answer := readLine()
-	endColor()
+	cfmt.End()
 	choosen, err := strconv.Atoi(answer)
 	if err != nil {
-		println("#r{Invalid input. Please try again.}")
+		fmt.Println("#r{Invalid input. Please try again.}")
 		return choose(text, choices)
 	}
 	if choosen < 0 || choosen >= len(choices) {
-		println("#r{Invalid input. Please try again.}")
+		fmt.Println("#r{Invalid input. Please try again.}")
 		return choose(text, choices)
 	}
 	return choices[choosen]
 }
 
 func yesno(question string) bool {
-	printf(question + " (y/n) ")
-	beginColor(colorMagenta)
+	fmt.Printf("%s (y/n) ", question)
+	cfmt.Begin(ansi.Purple)
 	answer := readLine()
-	endColor()
+	cfmt.End()
 	answer = strings.ToLower(answer)
 	switch answer {
 	case "y":
@@ -144,38 +87,38 @@ func formatTime(t time.Time) string {
 }
 
 func requestCurlCommand() string {
-	println("Please enter the curl command and accept with Ctrl-D.")
-	beginColor(colorMagenta)
+	fmt.Println("Please enter the curl command and accept with Ctrl-D.")
+	cfmt.Begin(ansi.Purple)
 	curlCommand := readMultiLine()
-	endColor()
+	cfmt.End()
 	if !strings.HasPrefix(curlCommand, "curl ") {
-		printf("#r{Not a curl command: %v\n}", curlCommand)
+		cfmt.Printf("#r{Not a curl command: %v\n}", curlCommand)
 		return requestCurlCommand()
 	}
-	println("Testing curl command...")
+	fmt.Println("Testing curl command...")
 	cmd := exec.Command("bash", "-c", curlCommand)
 	outBytes, err := cmd.CombinedOutput()
 	output := string(outBytes)
 	output = strings.TrimSpace(output)
 	if err != nil {
-		println("#r{Curl command failed}")
-		println(red(err.Error()))
+		cfmt.Println("#r{Curl command failed}")
+		cfmt.CPrintln(ansi.Red, err.Error())
 		if output != "" {
-			println(red(output))
+			cfmt.CPrintln(ansi.Red, (output))
 		}
 		return requestCurlCommand()
 	}
-	println("Curl command was successful.")
-	printf("Please hit enter to review the curl command's output before continuing.")
+	fmt.Println("Curl command was successful.")
+	fmt.Printf("Please hit enter to review the curl command's output before continuing.")
 	readLine()
 	cmd = exec.Command("more")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	writer := must2(cmd.StdinPipe())
-	must(cmd.Start())
-	must2(writer.Write(outBytes))
-	must(writer.Close())
-	must(cmd.Wait())
+	writer := Must2(cmd.StdinPipe())
+	Must(cmd.Start())
+	Must2(writer.Write(outBytes))
+	Must(writer.Close())
+	Must(cmd.Wait())
 	if ok := yesno("Is the curl command's output ok?"); ok {
 		referenceResponse = string(outBytes)
 		return curlCommand
@@ -184,24 +127,24 @@ func requestCurlCommand() string {
 }
 
 func performHardTimeoutTest(curlCommand string) {
-	printf("Performing #m{'%s'} test...\n", hardTimeoutTest)
+	cfmt.Printf("Performing #p{'%s'} test...\n", hardTimeoutTest)
 	if _, err := os.Stat("hard_timeout"); err == nil {
 		if yesno("Remove previous test results?") {
-			must(os.RemoveAll("hard_timeout"))
+			Must(os.RemoveAll("hard_timeout"))
 		} else {
-			printf("Abort.\n")
+			fmt.Printf("Abort.\n")
 			os.Exit(1)
 		}
 	}
-	must(os.Mkdir("hard_timeout", 0755))
-	must(os.WriteFile("hard_timeout/curl_command", []byte(curlCommand), 0644))
-	logFile := must2(os.OpenFile("hard_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
+	Must(os.Mkdir("hard_timeout", 0755))
+	Must(os.WriteFile("hard_timeout/curl_command", []byte(curlCommand), 0644))
+	logFile := Must2(os.OpenFile("hard_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
 	defer logFile.Close()
 	interval := intervalFlag
 	if interval == 0 {
 		interval = 5 * time.Minute
 	}
-	printf("Interval is set to #m{'%v'}\n", interval)
+	cfmt.Printf("Interval is set to #p{'%v'}\n", interval)
 	startTime = time.Now()
 	for {
 		cmd := exec.Command("bash", "-c", curlCommand)
@@ -212,37 +155,37 @@ func performHardTimeoutTest(curlCommand string) {
 		}
 		now := time.Now()
 		curlLogFile := fmt.Sprintf("hard_timeout/%v", formatTime(now))
-		must(os.WriteFile(curlLogFile, []byte(output), 0644))
+		Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v #r{%s}\n", formatTime(now), output)
-			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
+			cfmt.Printf("%v #r{%s}\n", formatTime(now), output)
+			Must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
 			similarity := CosineSimilarity(referenceResponse, output)
-			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
-			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
+			cfmt.Printf("%v #p{%f} similarity\n", formatTime(now), similarity)
+			Must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
 		time.Sleep(interval)
 	}
 }
 
 func performInactivityTimeoutTest(curlCommand string) {
-	printf("Performing #m{'%s'} test...\n", inactivityTimeoutTest)
+	cfmt.Printf("Performing #p{'%s'} test...\n", inactivityTimeoutTest)
 	if _, err := os.Stat("inactivity_timeout"); err == nil {
 		if yesno("Remove previous test results?") {
-			must(os.RemoveAll("inactivity_timeout"))
+			Must(os.RemoveAll("inactivity_timeout"))
 		} else {
-			printf("Abort.\n")
+			fmt.Printf("Abort.\n")
 			os.Exit(1)
 		}
 	}
-	must(os.Mkdir("inactivity_timeout", 0755))
-	must(os.WriteFile("inactivity_timeout/curl_command", []byte(curlCommand), 0644))
-	logFile := must2(os.OpenFile("inactivity_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
+	Must(os.Mkdir("inactivity_timeout", 0755))
+	Must(os.WriteFile("inactivity_timeout/curl_command", []byte(curlCommand), 0644))
+	logFile := Must2(os.OpenFile("inactivity_timeout/log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644))
 	defer logFile.Close()
 	interval := 0 * time.Minute
 	startTime = time.Now()
 	for {
-		printf("Waiting for #m{'%v'}\n", interval)
+		cfmt.Printf("Waiting for #p{'%v'}\n", interval)
 		time.Sleep(interval)
 		cmd := exec.Command("bash", "-c", curlCommand)
 		bytesOut, err := cmd.CombinedOutput()
@@ -252,14 +195,14 @@ func performInactivityTimeoutTest(curlCommand string) {
 		}
 		now := time.Now()
 		curlLogFile := fmt.Sprintf("inactivity_timeout/%v", formatTime(now))
-		must(os.WriteFile(curlLogFile, []byte(output), 0644))
+		Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
-			printf("%v #r{%s}\n", formatTime(now), output)
-			must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
+			cfmt.Printf("%v #r{%s}\n", formatTime(now), output)
+			Must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
 			similarity := CosineSimilarity(referenceResponse, output)
-			printf("%v #m{%f} similarity\n", formatTime(now), similarity)
-			must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
+			cfmt.Printf("%v #p{%f} similarity\n", formatTime(now), similarity)
+			Must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
 		if intervalFlag == 0 {
 			interval += 15 * time.Minute
@@ -285,19 +228,18 @@ func main() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sigs
-		printf(colorReset)
-		printf("\nAbort.\n")
+		fmt.Print(ansi.Reset)
+		fmt.Printf("\nAbort.\n")
 		os.Exit(1)
 	}()
-	println("Welcome to #m{wylmo}!")
-	flag.BoolVar(&noColorsFlag, "nocolors", false, "Disable colored output")
-	flag.DurationVar(&intervalFlag, "interval", 0, "Timeout interval in minutes (default: 5min for hard timeout, 15min for inactivity timeout).")
-	flag.Parse()
+	cfmt.Println("Welcome to #p{wylmo}!")
+	args := Args{}
+	clap.Parse(&args)
 	typeOfTest := choose("Please choose the type of test to perform", []string{
 		hardTimeoutTest,
 		inactivityTimeoutTest,
 	})
-	printf("Thank you for choosing #m{'%s'}\n", typeOfTest)
+	cfmt.Printf("Thank you for choosing #p{'%s'}\n", typeOfTest)
 	curlCommand := requestCurlCommand()
 	performTest(typeOfTest, curlCommand)
 }

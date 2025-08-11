@@ -1,6 +1,21 @@
+# github.com/tobiashort/ansi-go v0.0.0-20250806124809-2629ce31199d
+## explicit; go 1.24
+github.com/tobiashort/ansi-go
+# github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5
+## explicit; go 1.24
+github.com/tobiashort/cfmt-go
+# github.com/tobiashort/clap-go v0.0.0-20250807203524-ab844a28f97b
+## explicit; go 1.24.3
+github.com/tobiashort/clap-go
 # github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd
 ## explicit; go 1.24
 github.com/tobiashort/cosine-similarity-go
-# github.com/tobiashort/orderedmap-go v0.0.0-20250729190624-ec8e8c7a251e
+# github.com/tobiashort/isatty-go v0.0.0-20250729193227-00bbda39413c
 ## explicit; go 1.24
+github.com/tobiashort/isatty-go
+# github.com/tobiashort/orderedmap-go v0.0.0-20250808211554-a621a4f4674c
+## explicit; go 1.24.3
 github.com/tobiashort/orderedmap-go
+# github.com/tobiashort/utils-go v0.0.0-20250809133151-e63ee93a3da7
+## explicit; go 1.24.3
+github.com/tobiashort/utils-go/must
