@@ -7,14 +7,15 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/tobiashort/ansi-go"
 	"github.com/tobiashort/cfmt-go"
+	"github.com/tobiashort/choose-go"
 	"github.com/tobiashort/clap-go"
+
 	. "github.com/tobiashort/cosine-similarity-go"
 	. "github.com/tobiashort/utils-go/must"
 )
@@ -43,27 +44,6 @@ func readLine() string {
 func readMultiLine() string {
 	bytesRead := Must2(io.ReadAll(os.Stdin))
 	return strings.TrimSpace(string(bytesRead))
-}
-
-func choose(text string, choices []string) string {
-	fmt.Println(text)
-	for index, choice := range choices {
-		cfmt.Printf("#p{[%d] %s}\n", index, choice)
-	}
-	fmt.Printf("Please enter your choice (0-%d): ", len(choices)-1)
-	cfmt.Begin(ansi.Purple)
-	answer := readLine()
-	cfmt.End()
-	choosen, err := strconv.Atoi(answer)
-	if err != nil {
-		fmt.Println("#r{Invalid input. Please try again.}")
-		return choose(text, choices)
-	}
-	if choosen < 0 || choosen >= len(choices) {
-		fmt.Println("#r{Invalid input. Please try again.}")
-		return choose(text, choices)
-	}
-	return choices[choosen]
 }
 
 func yesno(question string) bool {
@@ -127,7 +107,7 @@ func requestCurlCommand() string {
 }
 
 func performHardTimeoutTest(curlCommand string) {
-	cfmt.Printf("Performing #p{'%s'} test...\n", hardTimeoutTest)
+	cfmt.Printf("Performing #yB{'%s'} test...\n", hardTimeoutTest)
 	if _, err := os.Stat("hard_timeout"); err == nil {
 		if yesno("Remove previous test results?") {
 			Must(os.RemoveAll("hard_timeout"))
@@ -144,7 +124,7 @@ func performHardTimeoutTest(curlCommand string) {
 	if interval == 0 {
 		interval = 5 * time.Minute
 	}
-	cfmt.Printf("Interval is set to #p{'%v'}\n", interval)
+	cfmt.Printf("Interval is set to #yB{'%v'}\n", interval)
 	startTime = time.Now()
 	for {
 		cmd := exec.Command("bash", "-c", curlCommand)
@@ -161,7 +141,7 @@ func performHardTimeoutTest(curlCommand string) {
 			Must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
 			similarity := CosineSimilarity(referenceResponse, output)
-			cfmt.Printf("%v #p{%f} similarity\n", formatTime(now), similarity)
+			cfmt.Printf("%v #yB{%f} similarity\n", formatTime(now), similarity)
 			Must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
 		time.Sleep(interval)
@@ -169,7 +149,7 @@ func performHardTimeoutTest(curlCommand string) {
 }
 
 func performInactivityTimeoutTest(curlCommand string) {
-	cfmt.Printf("Performing #p{'%s'} test...\n", inactivityTimeoutTest)
+	cfmt.Printf("Performing #yB{'%s'} test...\n", inactivityTimeoutTest)
 	if _, err := os.Stat("inactivity_timeout"); err == nil {
 		if yesno("Remove previous test results?") {
 			Must(os.RemoveAll("inactivity_timeout"))
@@ -185,7 +165,7 @@ func performInactivityTimeoutTest(curlCommand string) {
 	interval := 0 * time.Minute
 	startTime = time.Now()
 	for {
-		cfmt.Printf("Waiting for #p{'%v'}\n", interval)
+		cfmt.Printf("Waiting for #yB{'%v'}\n", interval)
 		time.Sleep(interval)
 		cmd := exec.Command("bash", "-c", curlCommand)
 		bytesOut, err := cmd.CombinedOutput()
@@ -201,7 +181,7 @@ func performInactivityTimeoutTest(curlCommand string) {
 			Must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
 		} else {
 			similarity := CosineSimilarity(referenceResponse, output)
-			cfmt.Printf("%v #p{%f} similarity\n", formatTime(now), similarity)
+			cfmt.Printf("%v #yB{%f} similarity\n", formatTime(now), similarity)
 			Must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
 		}
 		if intervalArg == 0 {
@@ -233,17 +213,21 @@ func main() {
 		os.Exit(1)
 	}()
 
-	cfmt.Println("Welcome to #p{wylmo}!")
+	cfmt.Println("Welcome to #yB{wylmo}!")
 
 	args := Args{}
 	clap.Parse(&args)
 	intervalArg = args.Interval
 
-	typeOfTest := choose("Please choose the type of test to perform", []string{
+	_, typeOfTest, ok := choose.Single("Please choose the type of test to perform", []string{
 		hardTimeoutTest,
 		inactivityTimeoutTest,
 	})
-	cfmt.Printf("Thank you for choosing #p{'%s'}\n", typeOfTest)
-	curlCommand := requestCurlCommand()
-	performTest(typeOfTest, curlCommand)
+	if ok {
+		cfmt.Printf("Thank you for choosing #yB{'%s'}\n", typeOfTest)
+		curlCommand := requestCurlCommand()
+		performTest(typeOfTest, curlCommand)
+	} else {
+		fmt.Println("Abort.")
+	}
 }

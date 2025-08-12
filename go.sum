@@ -1,7 +1,9 @@
-github.com/tobiashort/ansi-go v0.0.0-20250806124809-2629ce31199d h1:KCznFY8B2c+HW83hT67OEDLmNA4t5sEGrjHVDLA6ZhY=
-github.com/tobiashort/ansi-go v0.0.0-20250806124809-2629ce31199d/go.mod h1:yPoTE564mrx3g7842t9vvduaGlzo38iKRjIqtGANbyU=
+github.com/tobiashort/ansi-go v0.0.0-20250812160856-192158109001 h1:LfLqxPulVXw+NLTp3vNCIoLPbuHejB9E1v+AM0wwDm8=
+github.com/tobiashort/ansi-go v0.0.0-20250812160856-192158109001/go.mod h1:yPoTE564mrx3g7842t9vvduaGlzo38iKRjIqtGANbyU=
 github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5 h1:c0ofytvJ1jn9Aanz8sQwVY5sPGjfEzztdgr09siRIyA=
 github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5/go.mod h1:8pFtdCkzBpY6F+Kmqs+Mi7IJL7ysW+lershVsCLWMcc=
+github.com/tobiashort/choose-go v0.0.0-20250812163241-cd2a52bc6bc2 h1:z8t6w0dmhgbgigvF9KiVpJEhORG3Z1/otlz2kgZCEos=
+github.com/tobiashort/choose-go v0.0.0-20250812163241-cd2a52bc6bc2/go.mod h1:qboqQBr2MnEjYwwg2knFThTBVcv4CHmXfcrt/n1gqC4=
 github.com/tobiashort/clap-go v0.0.0-20250811184348-dfc140d2a01a h1:MHyD7CDvVc3X+f5C7gKiDDZnCTk0JQaIPESpE6Vq5zk=
 github.com/tobiashort/clap-go v0.0.0-20250811184348-dfc140d2a01a/go.mod h1:fXe6AMsDK0lviUTf5sJKXxfH/m5+KGbcK1jbNwy9Bd8=
 github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd h1:lqt2Eqx8kWzGbvX4brp60vqpRP/bIpf2MDXtzLQIuXg=
@@ -12,3 +14,7 @@ github.com/tobiashort/orderedmap-go v0.0.0-20250808211554-a621a4f4674c h1:59UJ5j
 github.com/tobiashort/orderedmap-go v0.0.0-20250808211554-a621a4f4674c/go.mod h1:2UXuS6N03zbjxIxA+NaUvoFGF7H5fsrfYShgYIYJC/o=
 github.com/tobiashort/utils-go v0.0.0-20250809133151-e63ee93a3da7 h1:p7rx4hxWGQsRTd8jxcwXn6VTKb4kWcyeBI8Ep50ocRs=
 github.com/tobiashort/utils-go v0.0.0-20250809133151-e63ee93a3da7/go.mod h1:3wsCtfMiXqp06v1rGwOpa8djcN7gBE1aVW7AobOjJBE=
+golang.org/x/sys v0.35.0 h1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=
+golang.org/x/sys v0.35.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
+golang.org/x/term v0.34.0 h1:O/2T7POpk0ZZ7MAzMeWFSg6S5IpWd/RXDlM9hgM3DR4=
+golang.org/x/term v0.34.0/go.mod h1:5jC53AEywhIVebHgPVeg0mj8OD3VO9OzclacVrqpaAw=
