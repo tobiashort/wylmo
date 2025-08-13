@@ -12,9 +12,12 @@ import (
 	"golang.org/x/term"
 )
 
-func Single(prompt string, options []string) (int, string, bool) {
+func One(prompt string, options []string) (int, string, bool) {
 	oldState := Must2(term.MakeRaw(int(os.Stdin.Fd())))
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
+
+	fmt.Print(ansi.CursorHide)
+	defer fmt.Print(ansi.CursorShow)
 
 	ok := false
 	selectedIndex := 0
@@ -70,7 +73,7 @@ draw:
 	}
 
 redraw:
-	fmt.Print(ansi.MoveCursorUp(len(options) + 1))
+	fmt.Print(ansi.CursorMoveUp(len(options) + 1))
 	goto draw
 
 done:

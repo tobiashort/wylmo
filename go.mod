@@ -3,9 +3,9 @@ module github.com/tobiashort/wylmo
 go 1.24.3
 
 require (
-	github.com/tobiashort/ansi-go v0.0.0-20250812160856-192158109001
+	github.com/tobiashort/ansi-go v0.0.0-20250813181820-5a307182d595
 	github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5
-	github.com/tobiashort/choose-go v0.0.0-20250812163241-cd2a52bc6bc2
+	github.com/tobiashort/choose-go v0.0.0-20250813200635-9e71406f81de
 	github.com/tobiashort/clap-go v0.0.0-20250811184348-dfc140d2a01a
 	github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd
 	github.com/tobiashort/utils-go v0.0.0-20250809133151-e63ee93a3da7
