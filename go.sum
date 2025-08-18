@@ -2,8 +2,6 @@ github.com/tobiashort/ansi-go v0.0.0-20250813181820-5a307182d595 h1:2iu/G9i3uNLL
 github.com/tobiashort/ansi-go v0.0.0-20250813181820-5a307182d595/go.mod h1:yPoTE564mrx3g7842t9vvduaGlzo38iKRjIqtGANbyU=
 github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5 h1:c0ofytvJ1jn9Aanz8sQwVY5sPGjfEzztdgr09siRIyA=
 github.com/tobiashort/cfmt-go v0.0.0-20250811054542-a128c4899fb5/go.mod h1:8pFtdCkzBpY6F+Kmqs+Mi7IJL7ysW+lershVsCLWMcc=
-github.com/tobiashort/choose-go v0.0.0-20250813182835-1124da0030de h1:T4vCkvjCb9BQ4+757AElpoHMQJGwBGxF6Vatzb5v4JU=
-github.com/tobiashort/choose-go v0.0.0-20250813182835-1124da0030de/go.mod h1:oCrX9Qlg2KaVzaY8NbtjYKxKM+Z/mT1jcWZhZ9Zsqf8=
 github.com/tobiashort/choose-go v0.0.0-20250813200635-9e71406f81de h1:FZp5gV8yJm1tnbIzbwDj9mmiD/1ktXc/Urp/k5u0n2c=
 github.com/tobiashort/choose-go v0.0.0-20250813200635-9e71406f81de/go.mod h1:oCrX9Qlg2KaVzaY8NbtjYKxKM+Z/mT1jcWZhZ9Zsqf8=
 github.com/tobiashort/clap-go v0.0.0-20250811184348-dfc140d2a01a h1:MHyD7CDvVc3X+f5C7gKiDDZnCTk0JQaIPESpE6Vq5zk=

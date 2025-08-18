@@ -16,9 +16,6 @@ func One(prompt string, options []string) (int, string, bool) {
 	oldState := Must2(term.MakeRaw(int(os.Stdin.Fd())))
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	fmt.Print(ansi.CursorHide)
-	defer fmt.Print(ansi.CursorShow)
-
 	ok := false
 	selectedIndex := 0
 

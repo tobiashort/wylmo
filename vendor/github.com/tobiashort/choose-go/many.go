@@ -26,9 +26,6 @@ func ManyN(prompt string, options []string, n int) ([]string, bool) {
 	oldState := Must2(term.MakeRaw(int(os.Stdin.Fd())))
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	fmt.Print(ansi.CursorHide)
-	defer fmt.Print(ansi.CursorShow)
-
 	ok := false
 	activeIndex := 0
 	selectedCount := 0
@@ -55,13 +52,6 @@ draw:
 			}
 		}
 	}
-
-	hints := ""
-	if n == len(options) {
-		hints += "(A)ll "
-	}
-	hints += "(N)one"
-	fmt.Printf("   %s", hints)
 
 	buf := make([]byte, 3)
 	for {
