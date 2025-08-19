@@ -134,15 +134,17 @@ func performHardTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		curlLogFile := fmt.Sprintf("hard_timeout/%v", formatTime(now))
-		Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
+			curlLogFile := fmt.Sprintf("hard_timeout/%v", formatTime(now))
+			Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 			cfmt.Printf("%v #r{%s}\n", formatTime(now), output)
-			Must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
+			Must2(fmt.Fprintf(logFile, "%v %s\n", formatTime(now), output))
 		} else {
 			similarity := CosineSimilarity(referenceResponse, output)
+			curlLogFile := fmt.Sprintf("hard_timeout/%v %f similarity", formatTime(now), similarity)
+			Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 			cfmt.Printf("%v #yB{%f} similarity\n", formatTime(now), similarity)
-			Must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
+			Must2(fmt.Fprintf(logFile, "%v %f similarity\n", formatTime(now), similarity))
 		}
 		time.Sleep(interval)
 	}
@@ -174,15 +176,17 @@ func performInactivityTimeoutTest(curlCommand string) {
 			output = err.Error() + "\n" + output
 		}
 		now := time.Now()
-		curlLogFile := fmt.Sprintf("inactivity_timeout/%v", formatTime(now))
-		Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 		if err != nil {
+			curlLogFile := fmt.Sprintf("inactivity_timeout/%v", formatTime(now))
+			Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 			cfmt.Printf("%v #r{%s}\n", formatTime(now), output)
-			Must2(logFile.WriteString(fmt.Sprintf("%v %s\n", formatTime(now), output)))
+			Must2(fmt.Fprintf(logFile, "%v %s\n", formatTime(now), output))
 		} else {
 			similarity := CosineSimilarity(referenceResponse, output)
+			curlLogFile := fmt.Sprintf("inactivity_timeout/%v %f similarity", formatTime(now), similarity)
+			Must(os.WriteFile(curlLogFile, []byte(output), 0644))
 			cfmt.Printf("%v #yB{%f} similarity\n", formatTime(now), similarity)
-			Must2(logFile.WriteString(fmt.Sprintf("%v %f similarity\n", formatTime(now), similarity)))
+			Must2(fmt.Fprintf(logFile, "%v %f similarity\n", formatTime(now), similarity))
 		}
 		if intervalArg == 0 {
 			interval += 15 * time.Minute
