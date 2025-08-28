@@ -46,21 +46,6 @@ func readMultiLine() string {
 	return strings.TrimSpace(string(bytesRead))
 }
 
-func yesno(question string) bool {
-	fmt.Printf("%s (y/n) ", question)
-	cfmt.Begin(ansi.Purple)
-	answer := readLine()
-	cfmt.End()
-	answer = strings.ToLower(answer)
-	switch answer {
-	case "y":
-		return true
-	case "n":
-		return false
-	}
-	return yesno(question)
-}
-
 func formatTime(t time.Time) string {
 	elapsed := t.Sub(startTime)
 	return fmt.Sprintf("%s +%s", t.Format("2006-01-02 15-04-05"), elapsed)
@@ -68,7 +53,7 @@ func formatTime(t time.Time) string {
 
 func requestCurlCommand() string {
 	fmt.Println("Please enter the curl command and accept with Ctrl-D.")
-	cfmt.Begin(ansi.Purple)
+	cfmt.Begin(ansi.DecorPurple)
 	curlCommand := readMultiLine()
 	cfmt.End()
 	if !strings.HasPrefix(curlCommand, "curl ") {
@@ -82,9 +67,9 @@ func requestCurlCommand() string {
 	output = strings.TrimSpace(output)
 	if err != nil {
 		cfmt.Println("#r{Curl command failed}")
-		cfmt.CPrintln(ansi.Red, err.Error())
+		cfmt.CPrintln(ansi.DecorRed, err.Error())
 		if output != "" {
-			cfmt.CPrintln(ansi.Red, (output))
+			cfmt.CPrintln(ansi.DecorRed, (output))
 		}
 		return requestCurlCommand()
 	}
@@ -99,7 +84,7 @@ func requestCurlCommand() string {
 	Must2(writer.Write(outBytes))
 	Must(writer.Close())
 	Must(cmd.Wait())
-	if ok := yesno("Is the curl command's output ok?"); ok {
+	if choose.YesNo("Is the curl command's output ok?", choose.DEFAULT_NONE) {
 		referenceResponse = string(outBytes)
 		return curlCommand
 	}
@@ -109,7 +94,7 @@ func requestCurlCommand() string {
 func performHardTimeoutTest(curlCommand string) {
 	cfmt.Printf("Performing #yB{'%s'} test...\n", hardTimeoutTest)
 	if _, err := os.Stat("hard_timeout"); err == nil {
-		if yesno("Remove previous test results?") {
+		if choose.YesNo("Remove previous test results?", choose.DEFAULT_NONE) {
 			Must(os.RemoveAll("hard_timeout"))
 		} else {
 			fmt.Printf("Abort.\n")
@@ -153,7 +138,7 @@ func performHardTimeoutTest(curlCommand string) {
 func performInactivityTimeoutTest(curlCommand string) {
 	cfmt.Printf("Performing #yB{'%s'} test...\n", inactivityTimeoutTest)
 	if _, err := os.Stat("inactivity_timeout"); err == nil {
-		if yesno("Remove previous test results?") {
+		if choose.YesNo("Remove previous test results?", choose.DEFAULT_NONE) {
 			Must(os.RemoveAll("inactivity_timeout"))
 		} else {
 			fmt.Printf("Abort.\n")
@@ -212,7 +197,7 @@ func main() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sigs
-		fmt.Print(ansi.Reset)
+		fmt.Print(ansi.DecorReset)
 		fmt.Printf("\nAbort.\n")
 		os.Exit(1)
 	}()
