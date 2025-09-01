@@ -1,9 +1,13 @@
 github.com/tobiashort/ansi-go v0.0.0-20250816044101-514d44e7de80 h1:6O17Z9hZ7g5r2mMigBB+0aobRJMgmTW6ZAFGCMq1YYI=
 github.com/tobiashort/ansi-go v0.0.0-20250816044101-514d44e7de80/go.mod h1:yPoTE564mrx3g7842t9vvduaGlzo38iKRjIqtGANbyU=
+github.com/tobiashort/ansi-go v0.0.0-20250830021733-b15679ec4301 h1:gpBmdjkFXHmn4TpgErPpWjv1qY/21J3ohkcx704/X50=
+github.com/tobiashort/ansi-go v0.0.0-20250830021733-b15679ec4301/go.mod h1:yPoTE564mrx3g7842t9vvduaGlzo38iKRjIqtGANbyU=
 github.com/tobiashort/cfmt-go v0.0.0-20250816044318-5ab05204143b h1:YCDY8IL6LST360MqNxbgVJh08s7rJziHbUP1zkPA1tk=
 github.com/tobiashort/cfmt-go v0.0.0-20250816044318-5ab05204143b/go.mod h1:cCrrgWw5vNVXK8lR7nEeGzQa2FQMR3EltD/Xm/FE2Y8=
 github.com/tobiashort/choose-go v0.0.0-20250828054537-2f21e5fb067f h1:CPntJ2MGo+I2PtAcWfuBQvLGtJ/6Voeav8y1hmLQkLM=
 github.com/tobiashort/choose-go v0.0.0-20250828054537-2f21e5fb067f/go.mod h1:oCrX9Qlg2KaVzaY8NbtjYKxKM+Z/mT1jcWZhZ9Zsqf8=
+github.com/tobiashort/choose-go v0.0.0-20250830032516-2db6c5173be8 h1:07C3qstNvdlE4y6rVhdfek1227qAbc50HVQrY6xh080=
+github.com/tobiashort/choose-go v0.0.0-20250830032516-2db6c5173be8/go.mod h1:aqYxpfJB4buKNBPLLvrYRKke388MiSavlreie9t9bOI=
 github.com/tobiashort/clap-go v0.0.0-20250825105453-cb1aa788e679 h1:yo0XU2yxrCRKWf95paWa0P3wP+usQuWkzo0x+SrxDsw=
 github.com/tobiashort/clap-go v0.0.0-20250825105453-cb1aa788e679/go.mod h1:fXe6AMsDK0lviUTf5sJKXxfH/m5+KGbcK1jbNwy9Bd8=
 github.com/tobiashort/cosine-similarity-go v0.0.0-20250729190741-e9947fca52fd h1:lqt2Eqx8kWzGbvX4brp60vqpRP/bIpf2MDXtzLQIuXg=

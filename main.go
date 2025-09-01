@@ -208,7 +208,7 @@ func main() {
 	clap.Parse(&args)
 	intervalArg = args.Interval
 
-	_, typeOfTest, ok := choose.One("Please choose the type of test to perform", []string{
+	typeOfTest, ok := choose.One("Please choose the type of test to perform", []string{
 		hardTimeoutTest,
 		inactivityTimeoutTest,
 	})
